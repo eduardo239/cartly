@@ -1,73 +1,86 @@
-# React + TypeScript + Vite
+# Cartly
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Front-end de e-commerce construído com React, TypeScript e Tailwind CSS. O Cartly cobre a jornada de compra: catálogo com filtros, página de produto, carrinho, checkout, confirmação de pagamento e histórico de pedidos.
 
-Currently, two official plugins are available:
+> **Status:** em desenvolvimento. Os produtos e pedidos vêm de dados mockados em [src/utils/db.ts](src/utils/db.ts), ainda sem back-end. O progresso por funcionalidade está em [PRJ.md](PRJ.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Funcionalidades
 
-## React Compiler
+- **Autenticação:** telas de cadastro e login, com botões de login social.
+- **Catálogo:** listagem de produtos com filtros (categoria, preço, marca) e ordenação (preço, popularidade, avaliação).
+- **Detalhes do produto:** galeria de imagens, descrição, características, especificações, cores, preço e disponibilidade.
+- **Carrinho:** alteração de quantidade e resumo do pedido.
+- **Checkout:** dados de entrega e cobrança, revisão e confirmação do pedido.
+- **Pedidos:** detalhes após a compra e listagem de pedidos anteriores.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Itens como busca, wishlist, logout, pagamento real e painel admin ainda estão no backlog.
 
-## Expanding the ESLint configuration
+## Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Área | Tecnologia |
+| --- | --- |
+| UI | React 19 |
+| Linguagem | TypeScript |
+| Build | Vite |
+| Estilos | Tailwind CSS 4 |
+| Rotas | React Router 7 |
+| Qualidade | ESLint + typescript-eslint |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Primeiros passos
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Pré-requisito: Node.js e um gerenciador de pacotes (o projeto tem lockfiles de `pnpm` e `npm`).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# instalar dependências
+pnpm install
+
+# servidor de desenvolvimento
+pnpm dev
+
+# build de produção (checagem de tipos + bundle)
+pnpm build
+
+# pré-visualizar o build
+pnpm preview
+
+# lint
+pnpm lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Com `npm`, use `npm install` e `npm run <script>`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Rotas
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Rota | Página |
+| --- | --- |
+| `/` | Loja ([ShopPage](src/pages/ShopPage.tsx)) |
+| `/products` | Produtos ([ProductPage](src/pages/ProductPage.tsx)) |
+| `/register` | Cadastro |
+| `/login` | Login |
+| `/cart` | Carrinho |
+| `/checkout` | Checkout |
+| `/payment-success` | Confirmação de pagamento |
+| `/orders` | Pedidos |
+
+## Estrutura do projeto
+
 ```
+src/
+├── components/   # componentes reutilizáveis (cards, formulários, resumo do pedido, checkout)
+├── pages/        # uma página por rota
+├── types/        # tipos TypeScript (produto, carrinho, pedido, pagamento, envio)
+├── utils/        # dados mockados, opções e utilitários de imagem
+├── styles/       # tema e CSS global
+├── App.tsx       # definição das rotas
+└── main.tsx      # ponto de entrada
+```
+
+## Roadmap
+
+O backlog completo está em [PRJ.md](PRJ.md). Os próximos passos principais:
+
+- Busca e paginação do catálogo
+- Wishlist e persistência do carrinho
+- Integração com gateway de pagamento
+- Back-end, autenticação real e painel administrativo
+- Testes automatizados e pipeline de CI/CD
