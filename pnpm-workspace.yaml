@@ -3,3 +3,5 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - react-router-dom@7.18.5
   - react-router@7.18.5
+overrides:
+  minimatch@>=7.0.0 <11.0.1: ^11.0.1
