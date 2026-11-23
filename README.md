@@ -1,19 +1,18 @@
-# Cartly
+# Carlty
 
-Front-end de e-commerce construído com React, TypeScript e Tailwind CSS. O Cartly cobre a jornada de compra: catálogo com filtros, página de produto, carrinho, checkout, confirmação de pagamento e histórico de pedidos.
+Front-end de e-commerce em que **cada produto é uma carta**. Construído com React, TypeScript e Tailwind CSS, com visual de baralho: cartas coloridas com cantos numerados, uma forma geométrica por produto e layout em mosaico.
 
-> **Status:** em desenvolvimento. Os produtos e pedidos vêm de dados mockados em [src/utils/db.ts](src/utils/db.ts), ainda sem back-end. O progresso por funcionalidade está em [PRJ.md](PRJ.md).
+> **Status:** só front-end. Produtos, pedidos e perfil vêm de dados mockados em [src/data](src/data), sem back-end.
 
-## Funcionalidades
+## Telas
 
-- **Autenticação:** telas de cadastro e login, com botões de login social.
-- **Catálogo:** listagem de produtos com filtros (categoria, preço, marca) e ordenação (preço, popularidade, avaliação).
-- **Detalhes do produto:** galeria de imagens, descrição, características, especificações, cores, preço e disponibilidade.
-- **Carrinho:** alteração de quantidade e resumo do pedido.
-- **Checkout:** dados de entrega e cobrança, revisão e confirmação do pedido.
-- **Pedidos:** detalhes após a compra e listagem de pedidos anteriores.
+- **Loja** (`/`): hero, filtro por categoria, busca e mosaico de cartas com animação de entrada.
+- **Produto** (`/produto/:id`): galeria de 4 vistas, cor, tamanho, quantidade, preço com desconto/parcelas/Pix, especificações e "Combina com sua mão". No mobile, a compra fica numa barra fixa com o total.
+- **Favoritos** (`/favoritos`): cartas marcadas com o coração.
+- **Perfil** (`/perfil`): cartão do cliente, pedidos em andamento (com rastreio e detalhes), favoritos, histórico filtrável com "Comprar de novo", endereços, pagamentos e configurações.
+- **Sacola**: painel lateral com quantidades, subtotal e finalização simulada (nenhum pagamento é processado).
 
-Itens como busca, wishlist, logout, pagamento real e painel admin ainda estão no backlog.
+Responsivo: no mobile entram a navegação inferior (Cartas, Buscar, Favoritos, Perfil), a busca no corpo da página e os botões flutuantes na página do produto.
 
 ## Stack
 
@@ -22,65 +21,34 @@ Itens como busca, wishlist, logout, pagamento real e painel admin ainda estão n
 | UI | React 19 |
 | Linguagem | TypeScript |
 | Build | Vite |
-| Estilos | Tailwind CSS 4 |
+| Estilos | Tailwind CSS 4 (tokens em [src/styles/index.css](src/styles/index.css)) |
 | Rotas | React Router 7 |
-| Qualidade | ESLint + typescript-eslint |
+| Fontes | Space Grotesk e Inter (Google Fonts) |
 
 ## Primeiros passos
 
-Pré-requisito: Node.js e um gerenciador de pacotes (o projeto tem lockfiles de `pnpm` e `npm`).
-
 ```bash
-# instalar dependências
-pnpm install
-
-# servidor de desenvolvimento
-pnpm dev
-
-# build de produção (checagem de tipos + bundle)
-pnpm build
-
-# pré-visualizar o build
-pnpm preview
-
-# lint
-pnpm lint
+pnpm install   # ou npm install
+pnpm dev       # servidor de desenvolvimento
+pnpm build     # checagem de tipos + bundle de produção
+pnpm preview   # pré-visualizar o build
 ```
 
-Com `npm`, use `npm install` e `npm run <script>`.
+> `pnpm lint` depende do `typescript-eslint`, que ainda não suporta o TypeScript 7 usado no projeto.
 
-## Rotas
-
-| Rota | Página |
-| --- | --- |
-| `/` | Loja ([ShopPage](src/pages/ShopPage.tsx)) |
-| `/products` | Produtos ([ProductPage](src/pages/ProductPage.tsx)) |
-| `/register` | Cadastro |
-| `/login` | Login |
-| `/cart` | Carrinho |
-| `/checkout` | Checkout |
-| `/payment-success` | Confirmação de pagamento |
-| `/orders` | Pedidos |
-
-## Estrutura do projeto
+## Estrutura
 
 ```
 src/
-├── components/   # componentes reutilizáveis (cards, formulários, resumo do pedido, checkout)
+├── components/   # CardPlate (a carta), ProductCard, Header, BagDrawer, BottomNav...
+│   └── profile/  # blocos da página de perfil
+├── context/      # estado global: sacola e favoritos
+├── data/         # tipos e dados mockados (produtos, pedidos, usuário)
+├── lib/          # formatação de preços e helpers de pedidos
 ├── pages/        # uma página por rota
-├── types/        # tipos TypeScript (produto, carrinho, pedido, pagamento, envio)
-├── utils/        # dados mockados, opções e utilitários de imagem
-├── styles/       # tema e CSS global
-├── App.tsx       # definição das rotas
+├── styles/       # Tailwind e tokens de design
+├── App.tsx       # rotas
 └── main.tsx      # ponto de entrada
 ```
 
-## Roadmap
-
-O backlog completo está em [PRJ.md](PRJ.md). Os próximos passos principais:
-
-- Busca e paginação do catálogo
-- Wishlist e persistência do carrinho
-- Integração com gateway de pagamento
-- Back-end, autenticação real e painel administrativo
-- Testes automatizados e pipeline de CI/CD
+Para criar um produto, adicione um item em [src/data/products.ts](src/data/products.ts): a superfície (cor da carta), a forma e as cores disponíveis definem como ele aparece.

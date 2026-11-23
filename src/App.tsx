@@ -1,29 +1,34 @@
-import { Route, Routes } from 'react-router-dom';
-import HeaderBar from './components/HeaderBar';
-import RegisterPage from './pages/RegisterPage';
-import HomePage from './pages/ShopPage';
-import LoginPage from './pages/LoginPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import PaymentSuccess from './pages/PaymentSuccess';
-import OrderPage from './pages/OrderPage';
+import { useEffect } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import Layout from './components/Layout';
+import FavoritesPage from './pages/FavoritesPage';
+import HomePage from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
 import ProductPage from './pages/ProductPage';
+import ProfilePage from './pages/ProfilePage';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 export default function App() {
   return (
-    <div>
-      <HeaderBar />
+    <>
+      <ScrollToTop />
       <Routes>
-        {/* Define your routes here */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/products" element={<ProductPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/orders" element={<OrderPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path="buscar" element={<HomePage focusSearch />} />
+          <Route path="produto/:id" element={<ProductPage />} />
+          <Route path="favoritos" element={<FavoritesPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+        <Route path="perfil" element={<ProfilePage />} />
       </Routes>
-    </div>
+    </>
   );
 }
