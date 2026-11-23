@@ -6,6 +6,8 @@ export const USER = {
   initials: 'MA',
   since: 'mar. 2024',
   vip: true,
+  /** Libera o painel em /admin (sem autenticação real: é só um mock). */
+  admin: true,
   orders: 14,
   coupons: 2,
   /** Favoritos antigos, fora desta sessão — somados aos que o usuário marca agora. */

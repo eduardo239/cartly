@@ -15,7 +15,7 @@ const MATCH: Record<Filter, (o: PastOrder) => boolean> = {
 };
 
 export default function PurchaseHistory() {
-  const { pastOrders, buyAgain } = useStore();
+  const { pastOrders, buyAgain, getProduct } = useStore();
   const [filter, setFilter] = useState<Filter>('Todos');
   const rows = pastOrders.filter(MATCH[filter]);
 
@@ -68,8 +68,8 @@ export default function PurchaseHistory() {
                   <tr key={o.id} className="border-t border-line">
                     <td className="px-5 py-4 font-semibold">#{o.id}</td>
                     <td className="px-5 py-4 text-ink-soft">{o.date}</td>
-                    <td className="px-5 py-4">{orderSummary(o.items)}</td>
-                    <td className="px-5 py-4 font-semibold">{formatPrice(orderTotal(o.items))}</td>
+                    <td className="px-5 py-4">{orderSummary(o.items, getProduct)}</td>
+                    <td className="px-5 py-4 font-semibold">{formatPrice(orderTotal(o.items, getProduct))}</td>
                     <td className="px-5 py-4">
                       <StatusPill status={o.status} />
                     </td>
@@ -92,10 +92,10 @@ export default function PurchaseHistory() {
                   <span className="font-semibold">#{o.id}</span>
                   <StatusPill status={o.status} />
                 </div>
-                <p className="mt-2 text-sm">{orderSummary(o.items)}</p>
+                <p className="mt-2 text-sm">{orderSummary(o.items, getProduct)}</p>
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span className="text-ink-soft">
-                    {o.date} · <span className="font-semibold text-ink">{formatPrice(orderTotal(o.items))}</span>
+                    {o.date} · <span className="font-semibold text-ink">{formatPrice(orderTotal(o.items, getProduct))}</span>
                   </span>
                   <button type="button" onClick={() => buyAgain(o.items)} className={link}>
                     Comprar de novo

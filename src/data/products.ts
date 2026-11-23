@@ -33,7 +33,9 @@ export const VIEW_SHAPES: Shape[] = [
 const DELIVERY = '2 a 5 dias úteis';
 const RETURNS = 'Grátis em 30 dias';
 
-export const PRODUCTS: Product[] = [
+type ProductBase = Omit<Product, 'stock' | 'published'>;
+
+const BASE: ProductBase[] = [
   {
     id: 'tenis-volt',
     number: 1,
@@ -281,11 +283,35 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
-const byId = new Map(PRODUCTS.map((p) => [p.id, p]));
+const STOCK: Record<string, number> = {
+  'tenis-volt': 42,
+  'fone-halo': 18,
+  'luminaria-arco': 9,
+  'mochila-trama': 25,
+  'relogio-orbita': 4,
+  'garrafa-fluxo': 60,
+  'caneca-bloco': 120,
+  'camera-foco': 3,
+  'oculos-prisma': 31,
+  'vaso-duna': 14,
+  'teclado-tecla': 22,
+  'jaqueta-norte': 17,
+};
 
-export function getProduct(id: string | undefined): Product | undefined {
-  return id ? byId.get(id) : undefined;
-}
+/** Catálogo inicial. O estado vivo (editável pelo admin) fica no contexto. */
+export const PRODUCTS_SEED: Product[] = BASE.map((p) => ({ ...p, stock: STOCK[p.id] ?? 10, published: true }));
+
+/** Formas prontas para escolher no admin. `width` e `ratio` são só o ponto de partida. */
+export const SHAPE_PRESETS: { key: string; label: string; shape: Shape }[] = [
+  { key: 'circle', label: 'Círculo', shape: { width: 55, ratio: 1, radius: '50%' } },
+  { key: 'square', label: 'Quadrado', shape: { width: 40, ratio: 1, radius: '14%' } },
+  { key: 'rounded', label: 'Retângulo', shape: { width: 50, ratio: 0.8, radius: '22%' } },
+  { key: 'wide', label: 'Largo', shape: { width: 62, ratio: 2.4, radius: '12%' } },
+  { key: 'pill-h', label: 'Pílula', shape: { width: 62, ratio: 2.5, radius: '999px' } },
+  { key: 'pill-v', label: 'Pílula alta', shape: { width: 32, ratio: 0.59, radius: '999px' } },
+  { key: 'arch', label: 'Arco', shape: { width: 46, ratio: 0.7, radius: '999px 999px 0 0' } },
+  { key: 'dome', label: 'Cúpula', shape: { width: 53, ratio: 0.8, radius: '32% 32% 4% 4%' } },
+];
 
 /** Percentual de desconto (inteiro) ou `null` se não houver preço anterior. */
 export function discountOf(p: Product): number | null {

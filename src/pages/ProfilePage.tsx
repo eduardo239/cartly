@@ -70,6 +70,16 @@ export default function ProfilePage() {
                     </button>
                   </li>
                 ))}
+                {user.admin && (
+                  <li>
+                    <Link
+                      to="/admin"
+                      className="flex h-10 w-full items-center rounded-full border border-line bg-white px-4 text-sm transition hover:border-ink md:rounded-2xl md:border-0 md:bg-transparent md:hover:bg-canvas"
+                    >
+                      Administração
+                    </Link>
+                  </li>
+                )}
                 <li className="hidden md:block">
                   <button
                     type="button"

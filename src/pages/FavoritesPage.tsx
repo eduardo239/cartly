@@ -1,12 +1,9 @@
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { useStore } from '../context/store-context';
-import { getProduct } from '../data/products';
-import type { Product } from '../data/types';
 
 export default function FavoritesPage() {
-  const { favorites } = useStore();
-  const items = favorites.map(getProduct).filter((p): p is Product => Boolean(p));
+  const { favoriteProducts: items } = useStore();
 
   return (
     <div className="mx-auto w-full max-w-[1280px] px-4 md:px-10">

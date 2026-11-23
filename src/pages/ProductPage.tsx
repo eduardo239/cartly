@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import CardPlate from '../components/CardPlate';
 import { ChevronLeftIcon, HeartIcon } from '../components/icons';
 import ProductCard from '../components/ProductCard';
 import ProductReviews, { Stars } from '../components/ProductReviews';
 import QtyStepper from '../components/QtyStepper';
 import { useStore } from '../context/store-context';
-import { COLORS, discountOf, getProduct, VIEW_LABELS, VIEW_SHAPES } from '../data/products';
+import { COLORS, discountOf, VIEW_LABELS, VIEW_SHAPES } from '../data/products';
 import type { ColorKey, Product } from '../data/types';
 import { formatPrice, pad } from '../lib/format';
 import { formatAverage, summarize } from '../lib/reviews';
@@ -14,15 +14,17 @@ import NotFoundPage from './NotFoundPage';
 
 export default function ProductPage() {
   const { id } = useParams();
+  const { getProduct, user } = useStore();
   const product = getProduct(id);
-  if (!product) return <NotFoundPage />;
+  // Produto oculto só é visível para quem administra (com aviso, para conferir antes de publicar).
+  if (!product || (!product.published && !user.admin)) return <NotFoundPage />;
   // `key` reinicia cor, tamanho e quantidade ao navegar entre produtos.
   return <ProductDetail key={product.id} product={product} />;
 }
 
 function ProductDetail({ product }: { product: Product }) {
   const navigate = useNavigate();
-  const { add, openBag, isFavorite, toggleFavorite, reviewsFor } = useStore();
+  const { add, openBag, isFavorite, toggleFavorite, reviewsFor, getProduct } = useStore();
   const [color, setColor] = useState<ColorKey>(product.color);
   const [size, setSize] = useState(product.defaultSize);
   const [qty, setQty] = useState(1);
@@ -37,17 +39,27 @@ function ProductDetail({ product }: { product: Product }) {
 
   const hex = COLORS[color].hex;
   const discount = discountOf(product);
+  const soldOut = product.stock <= 0;
   const favorite = isFavorite(product.id);
   const { count: reviewCount, average } = summarize(reviewsFor(product.id));
   const shapeFor = (i: number) => (i === 0 ? product.shape : VIEW_SHAPES[i]);
 
   const addToBag = () => {
+    if (soldOut) return;
     add(product.id, { color, size, qty });
     openBag();
   };
 
   return (
     <div className="mx-auto w-full max-w-[1180px] px-4 pb-10 pt-4 md:px-10 md:pt-6">
+      {!product.published && (
+        <p className="mb-4 rounded-2xl bg-peach px-4 py-3 text-sm text-peach-ink" role="status">
+          Este produto está <strong>oculto</strong> e só aparece para quem administra a loja.{' '}
+          <Link to={`/admin/produtos/${product.id}`} className="font-semibold underline underline-offset-2">
+            Editar
+          </Link>
+        </p>
+      )}
       <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,400px)] md:gap-10 lg:gap-14">
         {/* Galeria */}
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-4">
@@ -176,13 +188,14 @@ function ProductDetail({ product }: { product: Product }) {
           )}
 
           <div className="mt-6 flex items-center gap-3">
-            <QtyStepper value={qty} onChange={setQty} />
+            <QtyStepper value={qty} onChange={setQty} max={Math.max(1, Math.min(product.stock, 99))} />
             <button
               type="button"
               onClick={addToBag}
-              className="hidden h-12 flex-1 rounded-full bg-accent text-sm font-semibold text-white transition hover:bg-accent-ink md:block"
+              disabled={soldOut}
+              className="hidden h-12 flex-1 rounded-full bg-accent text-sm font-semibold text-white transition hover:bg-accent-ink disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-soft md:block"
             >
-              Adicionar à sacola
+              {soldOut ? 'Esgotado' : 'Adicionar à sacola'}
             </button>
             <button
               type="button"
@@ -194,6 +207,16 @@ function ProductDetail({ product }: { product: Product }) {
               <HeartIcon fill={favorite ? 'currentColor' : 'none'} />
             </button>
           </div>
+
+          {soldOut ? (
+            <p className="mt-3 text-sm font-semibold text-peach-ink">Esgotado no momento.</p>
+          ) : (
+            product.stock <= 5 && (
+              <p className="mt-3 text-sm font-semibold text-peach-ink">
+                {product.stock === 1 ? 'Resta 1 unidade' : `Restam ${product.stock} unidades`}
+              </p>
+            )
+          )}
 
           <section className="mt-7">
             <h2 className="text-xs font-semibold uppercase tracking-wide font-sans">Descrição</h2>
@@ -226,7 +249,7 @@ function ProductDetail({ product }: { product: Product }) {
         <ul className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           {product.related.map((rid, i) => {
             const related = getProduct(rid);
-            return related ? (
+            return related?.published ? (
               <li key={rid}>
                 <ProductCard product={related} index={i} />
               </li>
@@ -244,9 +267,10 @@ function ProductDetail({ product }: { product: Product }) {
         <button
           type="button"
           onClick={addToBag}
-          className="h-14 flex-1 rounded-full bg-accent text-base font-semibold text-white active:bg-accent-ink"
+          disabled={soldOut}
+          className="h-14 flex-1 rounded-full bg-accent text-base font-semibold text-white active:bg-accent-ink disabled:bg-line disabled:text-ink-soft"
         >
-          Adicionar à sacola
+          {soldOut ? 'Esgotado' : 'Adicionar à sacola'}
         </button>
       </div>
     </div>

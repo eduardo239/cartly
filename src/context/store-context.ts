@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { ActiveOrder, ColorKey, OrderItem, PastOrder, PurchaseStatus, Review } from '../data/types';
+import type { ActiveOrder, ColorKey, OrderItem, PastOrder, Product, PurchaseStatus, Review } from '../data/types';
 import type { User } from '../data/user';
 
 export interface CartLine {
@@ -26,6 +26,22 @@ export interface StoreValue {
   /* Cliente */
   user: User;
 
+  /* Catálogo */
+  /** Todos os produtos, inclusive os ocultos (uso do admin). */
+  products: Product[];
+  /** Só os publicados: o que a loja exibe. */
+  catalog: Product[];
+  /** Busca qualquer produto, publicado ou não. */
+  getProduct: (id: string | undefined) => Product | undefined;
+  /** Cria o produto ou, se o `id` já existir, atualiza. */
+  saveProduct: (product: Product) => void;
+  /** Remove o produto e limpa sacola, favoritos, avaliações e relacionados que o citam. */
+  deleteProduct: (id: string) => void;
+  /** Cria uma cópia oculta e devolve o id novo. */
+  duplicateProduct: (id: string) => string | undefined;
+  /** Volta ao catálogo inicial. */
+  resetCatalog: () => void;
+
   /* Sacola */
   lines: CartLine[];
   count: number;
@@ -37,6 +53,8 @@ export interface StoreValue {
 
   /* Favoritos */
   favorites: string[];
+  /** Favoritos que existem e estão publicados. */
+  favoriteProducts: Product[];
   /** Favoritos desta sessão somados aos antigos do cliente. */
   favoritesTotal: number;
   isFavorite: (productId: string) => boolean;

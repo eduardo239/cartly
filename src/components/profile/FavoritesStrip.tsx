@@ -1,11 +1,8 @@
 import { useStore } from '../../context/store-context';
-import { getProduct } from '../../data/products';
-import type { Product } from '../../data/types';
 import ProductCard from '../ProductCard';
 
 export default function FavoritesStrip({ onSeeAll }: { onSeeAll?: () => void }) {
-  const { favorites } = useStore();
-  const items = favorites.map(getProduct).filter((p): p is Product => Boolean(p));
+  const { favoriteProducts: items } = useStore();
   const shown = onSeeAll ? items.slice(0, 5) : items;
 
   return (

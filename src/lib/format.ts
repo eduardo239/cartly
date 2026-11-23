@@ -17,6 +17,13 @@ export function normalize(text: string): string {
     .trim();
 }
 
+/** "Tênis Volt" -> "tenis-volt" */
+export function slugify(text: string): string {
+  return normalize(text)
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export function pad(n: number): string {
   return String(n).padStart(2, '0');
 }

@@ -2,13 +2,15 @@ import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SearchField from '../components/SearchField';
-import { CATEGORIES, PRODUCTS } from '../data/products';
+import { useStore } from '../context/store-context';
+import { CATEGORIES } from '../data/products';
 import type { Category } from '../data/types';
 import { normalize } from '../lib/format';
 
 const TABS: ('Todos' | Category)[] = ['Todos', ...CATEGORIES];
 
 export default function HomePage({ focusSearch = false }: { focusSearch?: boolean }) {
+  const { catalog } = useStore();
   const [params, setParams] = useSearchParams();
   const q = params.get('q') ?? '';
   const cParam = params.get('c');
@@ -23,12 +25,12 @@ export default function HomePage({ focusSearch = false }: { focusSearch?: boolea
 
   const results = useMemo(() => {
     const term = normalize(q);
-    return PRODUCTS.filter(
+    return catalog.filter(
       (p) =>
         (category === 'Todos' || p.category === category) &&
         (!term || normalize(`${p.name} ${p.category}`).includes(term)),
     );
-  }, [q, category]);
+  }, [catalog, q, category]);
 
   return (
     <div className="mx-auto w-full max-w-[1280px] px-4 md:px-10">

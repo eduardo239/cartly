@@ -47,6 +47,10 @@ export interface Product {
   sizes?: string[];
   defaultSize?: string;
   related: string[];
+  /** Unidades em estoque. Com 0, o produto aparece como esgotado. */
+  stock: number;
+  /** Produtos ocultos não aparecem na loja. */
+  published: boolean;
 }
 
 export interface OrderItem {

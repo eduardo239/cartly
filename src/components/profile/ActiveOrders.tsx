@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import CardPlate from '../CardPlate';
 import { useStore } from '../../context/store-context';
-import { COLORS, getProduct } from '../../data/products';
+import { COLORS } from '../../data/products';
 import type { ActiveOrder } from '../../data/types';
 import { ORDER_STEPS } from '../../data/user';
 import { formatPrice } from '../../lib/format';
@@ -11,6 +11,7 @@ import StatusPill from './StatusPill';
 type Panel = 'track' | 'details' | null;
 
 function OrderCard({ order }: { order: ActiveOrder }) {
+  const { getProduct } = useStore();
   const [panel, setPanel] = useState<Panel>(null);
   const first = getProduct(order.items[0]?.productId);
   const count = itemCount(order.items);
@@ -28,7 +29,7 @@ function OrderCard({ order }: { order: ActiveOrder }) {
           <p className="text-xs text-ink-soft">
             Pedido #{order.id} · {count} {count === 1 ? 'item' : 'itens'}
           </p>
-          <h3 className="font-display text-lg font-semibold leading-snug">{orderTitle(order.items)}</h3>
+          <h3 className="font-display text-lg font-semibold leading-snug">{orderTitle(order.items, getProduct)}</h3>
           <p className="text-sm text-ink-soft">{order.eta}</p>
         </div>
         <StatusPill status={order.status} />
@@ -88,7 +89,7 @@ function OrderCard({ order }: { order: ActiveOrder }) {
             return (
               <li key={item.productId} className="flex justify-between gap-3">
                 <span>
-                  {p?.name} {item.qty > 1 && `×${item.qty}`}
+                  {p?.name ?? 'Produto removido'} {item.qty > 1 && `×${item.qty}`}
                 </span>
                 <span className="font-medium">{formatPrice((p?.price ?? 0) * item.qty)}</span>
               </li>

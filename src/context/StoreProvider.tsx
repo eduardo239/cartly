@@ -1,8 +1,9 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
-import { getProduct } from '../data/products';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { COLORS, PRODUCTS_SEED, SURFACES } from '../data/products';
 import { REVIEWS_SEED } from '../data/reviews';
-import type { ActiveOrder, OrderItem, PurchaseStatus, Review } from '../data/types';
+import type { ActiveOrder, OrderItem, Product, PurchaseStatus, Review } from '../data/types';
 import { ACTIVE_ORDERS, FAVORITES_SEED, PAST_ORDERS, USER } from '../data/user';
+import { slugify } from '../lib/format';
 import { StoreContext, type AddOptions, type CartLine, type StoreValue } from './store-context';
 
 const SEED_LINES: CartLine[] = [
@@ -10,13 +11,101 @@ const SEED_LINES: CartLine[] = [
   { key: 'oculos-prisma|ink|', productId: 'oculos-prisma', color: 'ink', qty: 1 },
 ];
 
+const CATALOG_KEY = 'carlty:catalog:v1';
+
+function isProduct(v: unknown): v is Product {
+  if (typeof v !== 'object' || v === null) return false;
+  const p = v as Partial<Product>;
+  return (
+    typeof p.id === 'string' &&
+    typeof p.name === 'string' &&
+    typeof p.price === 'number' &&
+    typeof p.stock === 'number' &&
+    typeof p.published === 'boolean' &&
+    typeof p.shape === 'object' &&
+    p.shape !== null &&
+    Array.isArray(p.colors) &&
+    Array.isArray(p.related) &&
+    p.surface !== undefined &&
+    p.surface in SURFACES &&
+    p.color !== undefined &&
+    p.color in COLORS
+  );
+}
+
+/** Catálogo salvo pelo admin neste navegador, ou o inicial. */
+function loadCatalog(): Product[] {
+  try {
+    const raw = localStorage.getItem(CATALOG_KEY);
+    if (raw) {
+      const data: unknown = JSON.parse(raw);
+      if (Array.isArray(data) && data.every(isProduct)) return data;
+    }
+  } catch {
+    /* armazenamento indisponível ou corrompido: usa o catálogo inicial */
+  }
+  return PRODUCTS_SEED;
+}
+
 export default function StoreProvider({ children }: { children: ReactNode }) {
+  const [products, setProducts] = useState<Product[]>(loadCatalog);
   const [lines, setLines] = useState<CartLine[]>(SEED_LINES);
   const [favorites, setFavorites] = useState<string[]>(FAVORITES_SEED);
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>(ACTIVE_ORDERS);
   const [lastOrder, setLastOrder] = useState<ActiveOrder | null>(null);
   const [reviews, setReviews] = useState<Review[]>(REVIEWS_SEED);
   const [bagOpen, setBagOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (products === PRODUCTS_SEED) localStorage.removeItem(CATALOG_KEY);
+      else localStorage.setItem(CATALOG_KEY, JSON.stringify(products));
+    } catch {
+      /* sem persistência: as mudanças valem só nesta sessão */
+    }
+  }, [products]);
+
+  /* Catálogo */
+  const getProduct = useCallback((id: string | undefined) => products.find((p) => p.id === id), [products]);
+
+  const saveProduct = useCallback((product: Product) => {
+    setProducts((current) =>
+      current.some((p) => p.id === product.id)
+        ? current.map((p) => (p.id === product.id ? product : p))
+        : [...current, product],
+    );
+  }, []);
+
+  const deleteProduct = useCallback((id: string) => {
+    setProducts((current) =>
+      current.filter((p) => p.id !== id).map((p) => (p.related.includes(id) ? { ...p, related: p.related.filter((r) => r !== id) } : p)),
+    );
+    setLines((current) => current.filter((l) => l.productId !== id));
+    setFavorites((current) => current.filter((f) => f !== id));
+    setReviews((current) => current.filter((r) => r.productId !== id));
+  }, []);
+
+  const duplicateProduct = useCallback(
+    (id: string) => {
+      const source = products.find((p) => p.id === id);
+      if (!source) return undefined;
+      const base = slugify(`${source.name} copia`);
+      let newId = base;
+      for (let n = 2; products.some((p) => p.id === newId); n++) newId = `${base}-${n}`;
+      const copy: Product = {
+        ...source,
+        id: newId,
+        name: `${source.name} (cópia)`,
+        number: Math.max(...products.map((p) => p.number)) + 1,
+        published: false,
+      };
+      setProducts((current) => [...current, copy]);
+      return newId;
+    },
+    [products],
+  );
+
+  const resetCatalog = useCallback(() => setProducts(PRODUCTS_SEED), []);
 
   /* Sacola */
   const add = useCallback((productId: string, options: AddOptions = {}) => {
@@ -31,7 +120,7 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
       if (found) return current.map((l) => (l.key === key ? { ...l, qty: l.qty + qty } : l));
       return [...current, { key, productId, color, size, qty }];
     });
-  }, []);
+  }, [getProduct]);
 
   const setQty = useCallback((key: string, qty: number) => {
     setLines((current) =>
@@ -123,6 +212,13 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
   const value = useMemo<StoreValue>(
     () => ({
       user: USER,
+      products,
+      catalog: products.filter((p) => p.published),
+      getProduct,
+      saveProduct,
+      deleteProduct,
+      duplicateProduct,
+      resetCatalog,
       lines,
       count: lines.reduce((sum, l) => sum + l.qty, 0),
       subtotal: lines.reduce((sum, l) => sum + (getProduct(l.productId)?.price ?? 0) * l.qty, 0),
@@ -131,6 +227,7 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
       remove,
       clear,
       favorites,
+      favoriteProducts: favorites.map(getProduct).filter((p): p is Product => Boolean(p?.published)),
       favoritesTotal: USER.savedBefore + favorites.length,
       isFavorite: (id) => favorites.includes(id),
       toggleFavorite,
@@ -149,7 +246,7 @@ export default function StoreProvider({ children }: { children: ReactNode }) {
       openBag,
       closeBag,
     }),
-    [lines, favorites, activeOrders, lastOrder, reviews, purchaseStatus, addReview, removeReview, bagOpen, add, setQty, remove, clear, toggleFavorite, checkout, buyAgain, openBag, closeBag],
+    [products, getProduct, saveProduct, deleteProduct, duplicateProduct, resetCatalog, lines, favorites, activeOrders, lastOrder, reviews, purchaseStatus, addReview, removeReview, bagOpen, add, setQty, remove, clear, toggleFavorite, checkout, buyAgain, openBag, closeBag],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

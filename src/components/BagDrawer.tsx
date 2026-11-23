@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/store-context';
-import { COLORS, getProduct } from '../data/products';
+import { COLORS } from '../data/products';
 import { formatPrice } from '../lib/format';
 import CardPlate from './CardPlate';
 import { BagIcon, CheckIcon, CloseIcon, TrashIcon } from './icons';
 import QtyStepper from './QtyStepper';
 
 export default function BagDrawer() {
-  const { lines, subtotal, count, setQty, remove, checkout, lastOrder, bagOpen, closeBag } = useStore();
+  const { getProduct, lines, subtotal, count, setQty, remove, checkout, lastOrder, bagOpen, closeBag } = useStore();
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {

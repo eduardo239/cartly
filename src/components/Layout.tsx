@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router-dom';
-import { getProduct } from '../data/products';
+import { useStore } from '../context/store-context';
 import BagDrawer from './BagDrawer';
 import BottomNav from './BottomNav';
 import Footer from './Footer';
@@ -23,6 +23,7 @@ function HeaderSearch() {
 }
 
 function Breadcrumbs({ productId }: { productId: string }) {
+  const { getProduct } = useStore();
   const product = getProduct(productId);
   if (!product) return null;
   return (
