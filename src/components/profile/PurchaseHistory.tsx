@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useStore } from '../../context/store-context';
-import { getProduct } from '../../data/products';
 import type { PastOrder } from '../../data/types';
-import { PAST_ORDERS } from '../../data/user';
 import { formatPrice } from '../../lib/format';
 import { orderSummary, orderTotal } from '../../lib/orders';
 import StatusPill from './StatusPill';
@@ -17,16 +15,9 @@ const MATCH: Record<Filter, (o: PastOrder) => boolean> = {
 };
 
 export default function PurchaseHistory() {
-  const { add, openBag } = useStore();
+  const { pastOrders, buyAgain } = useStore();
   const [filter, setFilter] = useState<Filter>('Todos');
-  const rows = PAST_ORDERS.filter(MATCH[filter]);
-
-  const buyAgain = (order: PastOrder) => {
-    order.items.forEach((item) => {
-      if (getProduct(item.productId)) add(item.productId, { qty: item.qty });
-    });
-    openBag();
-  };
+  const rows = pastOrders.filter(MATCH[filter]);
 
   const link = 'text-sm text-accent underline underline-offset-2';
 
@@ -83,7 +74,7 @@ export default function PurchaseHistory() {
                       <StatusPill status={o.status} />
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <button type="button" onClick={() => buyAgain(o)} className={link}>
+                      <button type="button" onClick={() => buyAgain(o.items)} className={link}>
                         Comprar de novo
                       </button>
                     </td>
@@ -106,7 +97,7 @@ export default function PurchaseHistory() {
                   <span className="text-ink-soft">
                     {o.date} · <span className="font-semibold text-ink">{formatPrice(orderTotal(o.items))}</span>
                   </span>
-                  <button type="button" onClick={() => buyAgain(o)} className={link}>
+                  <button type="button" onClick={() => buyAgain(o.items)} className={link}>
                     Comprar de novo
                   </button>
                 </div>

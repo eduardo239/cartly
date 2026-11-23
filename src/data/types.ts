@@ -54,7 +54,7 @@ export interface OrderItem {
   qty: number;
 }
 
-export type OrderStatus = 'Enviado' | 'Separando' | 'Entregue' | 'Devolvido';
+export type OrderStatus = 'Confirmado' | 'Enviado' | 'Separando' | 'Entregue' | 'Devolvido';
 
 export interface TrackingEvent {
   label: string;
@@ -77,3 +77,17 @@ export interface PastOrder {
   items: OrderItem[];
   status: OrderStatus;
 }
+
+export interface Review {
+  id: string;
+  productId: string;
+  author: string;
+  rating: number;
+  text: string;
+  date: string;
+  /** Avaliação escrita pelo cliente logado (pode ser excluída por ele). */
+  mine?: boolean;
+}
+
+/** Relação do cliente com um produto, usada para liberar a avaliação. */
+export type PurchaseStatus = 'delivered' | 'in-progress' | 'none';

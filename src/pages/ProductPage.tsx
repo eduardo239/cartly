@@ -3,11 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import CardPlate from '../components/CardPlate';
 import { ChevronLeftIcon, HeartIcon } from '../components/icons';
 import ProductCard from '../components/ProductCard';
+import ProductReviews, { Stars } from '../components/ProductReviews';
 import QtyStepper from '../components/QtyStepper';
 import { useStore } from '../context/store-context';
 import { COLORS, discountOf, getProduct, VIEW_LABELS, VIEW_SHAPES } from '../data/products';
 import type { ColorKey, Product } from '../data/types';
 import { formatPrice, pad } from '../lib/format';
+import { formatAverage, summarize } from '../lib/reviews';
 import NotFoundPage from './NotFoundPage';
 
 export default function ProductPage() {
@@ -20,7 +22,7 @@ export default function ProductPage() {
 
 function ProductDetail({ product }: { product: Product }) {
   const navigate = useNavigate();
-  const { add, openBag, isFavorite, toggleFavorite } = useStore();
+  const { add, openBag, isFavorite, toggleFavorite, reviewsFor } = useStore();
   const [color, setColor] = useState<ColorKey>(product.color);
   const [size, setSize] = useState(product.defaultSize);
   const [qty, setQty] = useState(1);
@@ -36,6 +38,7 @@ function ProductDetail({ product }: { product: Product }) {
   const hex = COLORS[color].hex;
   const discount = discountOf(product);
   const favorite = isFavorite(product.id);
+  const { count: reviewCount, average } = summarize(reviewsFor(product.id));
   const shapeFor = (i: number) => (i === 0 ? product.shape : VIEW_SHAPES[i]);
 
   const addToBag = () => {
@@ -111,6 +114,16 @@ function ProductDetail({ product }: { product: Product }) {
             {product.category} · Carta nº {pad(product.number)}
           </span>
           <h1 className="mt-3 text-[40px] font-bold leading-none tracking-[-0.03em] md:text-[44px]">{product.name}</h1>
+
+          {reviewCount > 0 && (
+            <a href="#avaliacoes" className="mt-3 inline-flex items-center gap-2 text-sm">
+              <Stars value={average} size={15} />
+              <span className="font-semibold">{formatAverage(average)}</span>
+              <span className="text-ink-soft underline underline-offset-2">
+                ({reviewCount} {reviewCount === 1 ? 'avaliação' : 'avaliações'})
+              </span>
+            </a>
+          )}
 
           <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="font-display text-[28px] font-bold leading-none">{formatPrice(product.price)}</span>
@@ -202,6 +215,8 @@ function ProductDetail({ product }: { product: Product }) {
           </dl>
         </div>
       </div>
+
+      <ProductReviews productId={product.id} />
 
       {/* Relacionados */}
       <section className="mt-14 md:mt-16" aria-labelledby="related">

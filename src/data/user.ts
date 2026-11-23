@@ -12,6 +12,8 @@ export const USER = {
   savedBefore: 18,
 };
 
+export type User = typeof USER;
+
 export const FAVORITES_SEED = ['fone-halo', 'relogio-orbita', 'garrafa-fluxo', 'camera-foco', 'vaso-duna'];
 
 export const ORDER_STEPS = ['Confirmado', 'Separado', 'Enviado', 'Entregue'];

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BagDrawer from '../components/BagDrawer';
 import BottomNav from '../components/BottomNav';
+import { useStore } from '../context/store-context';
 import { ChevronLeftIcon } from '../components/icons';
 import Logo from '../components/Logo';
 import ActiveOrders from '../components/profile/ActiveOrders';
@@ -9,7 +10,6 @@ import FavoritesStrip from '../components/profile/FavoritesStrip';
 import { AddressesPanel, PaymentsPanel, SettingsPanel } from '../components/profile/InfoPanels';
 import ProfileCard from '../components/profile/ProfileCard';
 import PurchaseHistory from '../components/profile/PurchaseHistory';
-import { ACTIVE_ORDERS, USER } from '../data/user';
 
 type Tab = 'overview' | 'orders' | 'favorites' | 'addresses' | 'payments' | 'settings';
 
@@ -25,7 +25,8 @@ const NAV: { id: Tab; label: string }[] = [
 export default function ProfilePage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('overview');
-  const active = ACTIVE_ORDERS.length;
+  const { user, activeOrders } = useStore();
+  const active = activeOrders.length;
 
   useEffect(() => {
     document.title = 'Meu perfil · Carlty';
@@ -87,7 +88,7 @@ export default function ProfilePage() {
               <>
                 {tab === 'overview' && (
                   <div className="hidden md:block">
-                    <h1 className="text-[44px] font-bold leading-none tracking-[-0.03em]">Olá, {USER.firstName}.</h1>
+                    <h1 className="text-[44px] font-bold leading-none tracking-[-0.03em]">Olá, {user.firstName}.</h1>
                     <p className="mt-2 text-ink-soft">
                       Você tem {active} {active === 1 ? 'pedido' : 'pedidos'} a caminho.
                     </p>

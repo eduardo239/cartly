@@ -103,3 +103,9 @@ export const DiamondIcon = (p: IconProps) => (
     <path d="M4 0 8 5 4 10 0 5Z" />
   </svg>
 );
+
+export const StarIcon = (p: IconProps) => (
+  <Svg strokeWidth={1.4} {...p}>
+    <path d="m12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L12 3.6Z" />
+  </Svg>
+);

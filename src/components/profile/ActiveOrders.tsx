@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import CardPlate from '../CardPlate';
+import { useStore } from '../../context/store-context';
 import { COLORS, getProduct } from '../../data/products';
 import type { ActiveOrder } from '../../data/types';
-import { ACTIVE_ORDERS, ORDER_STEPS } from '../../data/user';
+import { ORDER_STEPS } from '../../data/user';
 import { formatPrice } from '../../lib/format';
 import { itemCount, orderTitle } from '../../lib/orders';
 import StatusPill from './StatusPill';
@@ -100,6 +101,7 @@ function OrderCard({ order }: { order: ActiveOrder }) {
 }
 
 export default function ActiveOrders() {
+  const { activeOrders } = useStore();
   return (
     <section aria-labelledby="active-orders">
       <h2 id="active-orders" className="mb-4 text-2xl font-semibold md:text-[22px]">
@@ -107,7 +109,7 @@ export default function ActiveOrders() {
         <span className="hidden md:inline">Pedidos em andamento</span>
       </h2>
       <div className="grid items-start gap-4 lg:grid-cols-2">
-        {ACTIVE_ORDERS.map((order) => (
+        {activeOrders.map((order) => (
           <OrderCard key={order.id} order={order} />
         ))}
       </div>

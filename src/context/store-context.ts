@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
-import type { ColorKey } from '../data/types';
+import type { ActiveOrder, ColorKey, OrderItem, PastOrder, PurchaseStatus, Review } from '../data/types';
+import type { User } from '../data/user';
 
 export interface CartLine {
   key: string;
@@ -15,7 +16,17 @@ export interface AddOptions {
   qty?: number;
 }
 
+/**
+ * Estado global da aplicação.
+ *
+ * Fica de fora de propósito o que deve viver na URL (busca `?q=` e categoria `?c=`)
+ * e o que é local a uma tela (aba do perfil, variação escolhida no produto).
+ */
 export interface StoreValue {
+  /* Cliente */
+  user: User;
+
+  /* Sacola */
   lines: CartLine[];
   count: number;
   subtotal: number;
@@ -23,9 +34,35 @@ export interface StoreValue {
   setQty: (key: string, qty: number) => void;
   remove: (key: string) => void;
   clear: () => void;
+
+  /* Favoritos */
   favorites: string[];
+  /** Favoritos desta sessão somados aos antigos do cliente. */
+  favoritesTotal: number;
   isFavorite: (productId: string) => boolean;
   toggleFavorite: (productId: string) => void;
+
+  /* Pedidos */
+  activeOrders: ActiveOrder[];
+  pastOrders: PastOrder[];
+  ordersTotal: number;
+  /** Transforma a sacola em um pedido em andamento e esvazia a sacola. */
+  checkout: () => void;
+  /** Pedido recém-criado, exibido como confirmação na sacola. */
+  lastOrder: ActiveOrder | null;
+  /** Coloca os itens de um pedido antigo na sacola e abre a sacola. */
+  buyAgain: (items: OrderItem[]) => void;
+
+  /* Avaliações */
+  reviews: Review[];
+  reviewsFor: (productId: string) => Review[];
+  /** 'delivered' libera avaliar; 'in-progress' = comprou, mas ainda não recebeu. */
+  purchaseStatus: (productId: string) => PurchaseStatus;
+  /** Publica a avaliação do cliente (uma por produto, apenas após a entrega). */
+  addReview: (productId: string, rating: number, text: string) => boolean;
+  removeReview: (id: string) => void;
+
+  /* Interface */
   bagOpen: boolean;
   openBag: () => void;
   closeBag: () => void;

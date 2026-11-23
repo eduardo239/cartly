@@ -1,6 +1,7 @@
 import type { OrderStatus } from '../../data/types';
 
 const STYLES: Record<OrderStatus, string> = {
+  Confirmado: 'bg-accent-soft text-ink',
   Enviado: 'bg-lime text-ink',
   Separando: 'bg-accent-soft text-ink',
   Entregue: 'bg-mint text-mint-ink',

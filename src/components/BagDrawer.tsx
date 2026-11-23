@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/store-context';
 import { COLORS, getProduct } from '../data/products';
@@ -8,23 +8,14 @@ import { BagIcon, CheckIcon, CloseIcon, TrashIcon } from './icons';
 import QtyStepper from './QtyStepper';
 
 export default function BagDrawer() {
-  const { lines, subtotal, count, setQty, remove, clear, bagOpen, closeBag } = useStore();
-  const [placed, setPlaced] = useState(false);
+  const { lines, subtotal, count, setQty, remove, checkout, lastOrder, bagOpen, closeBag } = useStore();
   const closeRef = useRef<HTMLButtonElement>(null);
-
-  const close = () => {
-    closeBag();
-    setPlaced(false);
-  };
 
   useEffect(() => {
     if (!bagOpen) return;
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeBag();
-        setPlaced(false);
-      }
+      if (e.key === 'Escape') closeBag();
     };
     document.addEventListener('keydown', onKey);
     const previous = document.body.style.overflow;
@@ -35,15 +26,10 @@ export default function BagDrawer() {
     };
   }, [bagOpen, closeBag]);
 
-  const checkout = () => {
-    clear();
-    setPlaced(true);
-  };
-
   return (
     <div className={`fixed inset-0 z-50 ${bagOpen ? '' : 'pointer-events-none'}`} aria-hidden={!bagOpen} inert={!bagOpen}>
       <div
-        onClick={close}
+        onClick={closeBag}
         className={`absolute inset-0 bg-ink/40 transition-opacity duration-300 ${bagOpen ? 'opacity-100' : 'opacity-0'}`}
       />
       <aside
@@ -59,7 +45,7 @@ export default function BagDrawer() {
           <button
             ref={closeRef}
             type="button"
-            onClick={close}
+            onClick={closeBag}
             aria-label="Fechar sacola"
             className="grid size-10 place-items-center rounded-full border border-line bg-white hover:border-ink"
           >
@@ -67,18 +53,18 @@ export default function BagDrawer() {
           </button>
         </div>
 
-        {placed ? (
+        {lastOrder ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
             <span className="grid size-16 place-items-center rounded-full bg-lime">
               <CheckIcon width={28} height={28} />
             </span>
-            <h3 className="text-2xl font-bold">Pedido confirmado!</h3>
+            <h3 className="text-2xl font-bold">Pedido #{lastOrder.id} confirmado!</h3>
             <p className="text-sm text-ink-soft">
               Isto é uma demonstração: nenhum pagamento foi processado. Acompanhe seus pedidos no perfil.
             </p>
             <Link
               to="/perfil"
-              onClick={close}
+              onClick={closeBag}
               className="mt-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white hover:bg-accent"
             >
               Ver meus pedidos
@@ -91,7 +77,7 @@ export default function BagDrawer() {
             <p className="text-sm text-ink-soft">Escolha uma carta para começar a sua mão.</p>
             <Link
               to="/"
-              onClick={close}
+              onClick={closeBag}
               className="mt-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white hover:bg-accent"
             >
               Ver as cartas
@@ -105,7 +91,7 @@ export default function BagDrawer() {
                 if (!product) return null;
                 return (
                   <li key={line.key} className="flex gap-3 rounded-2xl bg-white p-3">
-                    <Link to={`/produto/${product.id}`} onClick={close} className="w-16 shrink-0" aria-label={product.name}>
+                    <Link to={`/produto/${product.id}`} onClick={closeBag} className="w-16 shrink-0" aria-label={product.name}>
                       <CardPlate
                         surface={product.surface}
                         color={COLORS[line.color].hex}
